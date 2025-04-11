@@ -21,8 +21,8 @@ class link(commands.Cog):
         resRole = "",
         visitorRole = ""
     )
-    self.API_URL = "https://www.nationstates.net/cgi-bin/api.cgi?region=vibonia&q=nations"
-    self.USER_AGENT = "Lionsroar"
+        self.API_URL = "https://www.nationstates.net/cgi-bin/api.cgi?region=vibonia&q=nations"
+        self.USER_AGENT = "Lionsroar"
 
     @commands.Cog.listener()
     async def on_ready(self):
