@@ -315,6 +315,7 @@ class link(commands.Cog):
     
         await ctx.send(f"📜 Welcome Message:\n{message}\n\n📢 Channel: {channel.mention if channel else 'Default system/first available channel'}")
 
+    
     @commands.guild_only()
     @commands.admin()
     @commands.command(name="dropnation")
