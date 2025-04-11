@@ -18,7 +18,7 @@ class link(commands.Cog):
         self.config.register_guild(
         welcome_message="This is a test",  # Message to send when a new user joins
         welcome_channel=1263079556420603935,
-        resRole = ""
+        resRole = "",
         visitorRole = ""
     )
     self.API_URL = "https://www.nationstates.net/cgi-bin/api.cgi?region=vibonia&q=nations"
