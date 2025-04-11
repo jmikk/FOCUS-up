@@ -63,7 +63,7 @@ class link(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def setregion(self, ctx, *, region: str):
-        await self.config.region.set(region.strip())
+        await self.config.region.set(region.strip().replace(" ","_")
         await ctx.send(f"✅ Region set to `{region.strip()}`.")
 
     @commands.command()
