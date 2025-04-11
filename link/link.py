@@ -185,7 +185,7 @@ class link(commands.Cog):
                             await self.residency_check(guild, channel)
                         except Exception as e:
                             print(f"Error sending daily message in {guild.name}: {e}")
-
+                            
     async def residency_check(self, guild, channel):
         residents = await self.fetch_nations()
         if not residents:
@@ -217,3 +217,60 @@ class link(commands.Cog):
                 lost_role += 1
 
         await channel.send(f"✅ {gained_role} users gained the resident role.\n❌ {lost_role} users lost the resident role.")
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        guild_config = await self.config.guild(member.guild).all()
+        welcome_channel_id = guild_config["welcome_channel"]
+        welcome_message = guild_config["welcome_message"]
+
+        if welcome_channel_id and welcome_message:
+            channel = member.guild.get_channel(welcome_channel_id)
+            if channel:
+                try:
+                    formatted_message = welcome_message.replace("{mention}", member.mention).replace("{user}", member.name)
+                    await channel.send(formatted_message)
+                except discord.Forbidden:
+                    print(f"Missing permissions to send welcome message in {channel.name}.")
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def setwelcome(self, ctx, *, message: str):
+        await self.config.guild(ctx.guild).welcome_message.set(message)
+        await ctx.send("✅ Welcome message updated. Use `{mention}` or `{user}` as placeholders.")
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def setwelcomechannel(self, ctx, channel: discord.TextChannel):
+        await self.config.guild(ctx.guild).welcome_channel.set(channel.id)
+        await ctx.send(f"✅ Welcome channel set to {channel.mention}.")
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def viewwelcome(self, ctx):
+        conf = await self.config.guild(ctx.guild).all()
+        msg = conf.get("welcome_message", "Not set")
+        chan = conf.get("welcome_channel")
+        ch = ctx.guild.get_channel(chan) if chan else None
+        await ctx.send(f"📜 **Welcome Message:** {msg}\n📢 **Channel:** {ch.mention if ch else 'Not set'}")
+
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def startloop(self, ctx):
+        """Force start the daily task loop if it's not already running."""
+        if self.daily_task.is_running():
+            await ctx.send("🔁 The daily task loop is already running.")
+        else:
+            self.daily_task.start()
+            await ctx.send("✅ Daily task loop started.")
+
+    @commands.command()
+    @commands.has_permissions(administrator=True)
+    async def checkloop(self, ctx):
+        """Check if the daily task loop is currently running."""
+        running = self.daily_task.is_running()
+        await ctx.send(f"🔍 Daily task running: {'✅ Yes' if running else '❌ No'}")
