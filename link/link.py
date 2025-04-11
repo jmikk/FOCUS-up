@@ -42,6 +42,8 @@ class link(commands.Cog):
                     message = await channel.send("Starting daily cycle")
                     ctx = await self.bot.get_context(message)
                     await self.resChk(channel)
+                except Exception as e:
+                        await channel.send(e)
 
     async def fetch_nations(self):
         """Fetch nations from the NationStates API asynchronously."""
