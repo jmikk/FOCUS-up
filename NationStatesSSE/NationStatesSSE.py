@@ -7,6 +7,8 @@ from redbot.core.bot import Red
 from datetime import datetime, timedelta
 import json
 import xml.etree.ElementTree as ET
+import html
+
 
 class NationStatesSSE(commands.Cog):
     def __init__(self, bot: Red):
@@ -164,7 +166,8 @@ class NationStatesSSE(commands.Cog):
                             if channel:
                                 await channel.send(embed=embed)
                         return  # Don't continue with normal handling
-                
+            
+            message = html.unescape(message)
             dispatch_match = re.search(r'([a-z0-9_]+) published "<a href="page=dispatch/id=(\d+)">(.*?)</a>" \((.*?)\)', message, re.IGNORECASE)
             if dispatch_match:
                 author = dispatch_match.group(1)
