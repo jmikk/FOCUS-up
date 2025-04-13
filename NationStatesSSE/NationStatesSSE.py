@@ -10,7 +10,7 @@ class NationStatesSSE(commands.Cog):
     def __init__(self, bot: Red):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1357908642, force_registration=True)
-        self.config.register_guild(channel=None, whitelist=[], blacklist=[], region="the_wellspring")
+        self.config.register_guild(channel=None, whitelist=[], blacklist=[], region="the_wellspring", user_agent="Redbot-SSE-Listener")
         self.session = aiohttp.ClientSession()
         self.sse_task = self.bot.loop.create_task(self.sse_listener())
         self.last_event_time = datetime.utcnow()
@@ -95,6 +95,16 @@ class NationStatesSSE(commands.Cog):
         else:
             await ctx.send("SSE listener is not running.")
 
+    @commands.guild_only()
+    @commands.admin()
+    @commands.command()
+    async def setuseragent(self, ctx, *, agent: str):
+        await self.config.guild(ctx.guild).user_agent.set(agent)
+        await ctx.send(f"User-Agent set to: `{agent}`. Reconnecting stream...")
+        if self.sse_task:
+            self.sse_task.cancel()
+        self.sse_task = self.bot.loop.create_task(self.sse_listener())
+
     @commands.command()
     async def viewfilters(self, ctx):
         wl = await self.config.guild(ctx.guild).whitelist()
@@ -108,7 +118,7 @@ class NationStatesSSE(commands.Cog):
                 for guild in self.bot.guilds:
                     region = await self.config.guild(guild).region()
                     url = f"https://www.nationstates.net/api/region:{region}"
-                    async with self.session.get(url, headers={"User-Agent": "9005"}) as resp:
+                    async with self.session.get(url, headers={"User-Agent": await self.config.guild(guild).user_agent()}) as resp:
                         async for line in resp.content:
                             if line == b'\n':
                                 continue
