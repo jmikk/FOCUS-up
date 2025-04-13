@@ -173,16 +173,15 @@ class NationStatesSSE(commands.Cog):
                     dispatch_type = dispatch_match.group(4)
                     dispatch_url = f"https://www.nationstates.net/nation={author}/detail={dispatch_type.split(':')[0].strip().lower()}/id={dispatch_id}"
 
-
-                embed = discord.Embed(title=dispatch_title, url=dispatch_url, timestamp=datetime.utcnow())
-                embed.set_footer(text=f"{dispatch_type} Dispatch")
-                cfg = self.config.guild(guild)
-                channel_id = await cfg.channel()
-                if channel_id:
-                    channel = self.bot.get_channel(channel_id)
-                    if channel:
-                        await channel.send(embed=embed)
-                return
+                    embed = discord.Embed(title=dispatch_title, url=dispatch_url, timestamp=datetime.utcnow())
+                    embed.set_footer(text=f"{dispatch_type} Dispatch")
+                    cfg = self.config.guild(guild)
+                    channel_id = await cfg.channel()
+                    if channel_id:
+                        channel = self.bot.get_channel(channel_id)
+                        if channel:
+                            await channel.send(embed=embed)
+                    return
 
             embed_title = "News from around the Well"
             if message.lower().startswith("following new legislation"):
