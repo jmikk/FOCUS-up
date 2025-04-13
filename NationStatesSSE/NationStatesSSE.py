@@ -148,7 +148,7 @@ class NationStatesSSE(commands.Cog):
                           # Add remaining message
                         if clean_text:
                             embed.add_field(name="Message", value=clean_text[:1024], inline=False)
-                          
+
                           # Updated post link format
                         post_url = f"https://www.nationstates.net/region={region}/page=display_region_rmb?postid={post_id}#p{post_id}"
                         embed.set_footer(text=f"Posted by {nation} | View Post", icon_url="https://www.nationstates.net/images/nation_icon.png")
