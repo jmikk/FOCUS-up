@@ -114,7 +114,7 @@ class NationStatesSSE(commands.Cog):
                         channel = self.bot.get_channel(channel_id)
                         if channel:
                             await channel.send(f"⚠️ SSE Error: `{e}` Reconnecting in 10 seconds...")
-                    if e == "Session is closed":
+                    if e == "Session is closed" or e == "SSL shutdown timed out":
                         return
                     await asyncio.sleep(10)
                     continue    
