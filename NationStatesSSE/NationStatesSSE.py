@@ -108,7 +108,7 @@ class NationStatesSSE(commands.Cog):
                 for guild in self.bot.guilds:
                     region = await self.config.guild(guild).region()
                     url = f"https://www.nationstates.net/api/region:{region}"
-                    async with self.session.get(url, headers={"User-Agent": "Redbot-SSE-Listener"}) as resp:
+                    async with self.session.get(url, headers={"User-Agent": "9005"}) as resp:
                         async for line in resp.content:
                             if line == b'\n':
                                 continue
