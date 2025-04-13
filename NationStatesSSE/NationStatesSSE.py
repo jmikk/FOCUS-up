@@ -53,7 +53,7 @@ class NationStatesSSE(commands.Cog):
     @commands.guild_only()
     @commands.admin()
     @commands.command()
-    async def setuseragent(self, ctx, *, agent: str):
+    async def SSEsetuseragent(self, ctx, *, agent: str):
         await self.config.guild(ctx.guild).user_agent.set(agent)
         await ctx.send(f"User-Agent set to: `{agent}`.")
         if await self._ensure_configured(ctx.guild):
