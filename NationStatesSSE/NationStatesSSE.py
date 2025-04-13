@@ -121,7 +121,7 @@ class NationStatesSSE(commands.Cog):
             # Extract image URL (supports both PNG and SVG formats)
             match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
             flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
-
+            flag_url = flag_url.replace(".svg",".png")
             # Go through all guilds
             for guild in self.bot.guilds:
                 channel_id = await self.config.guild(guild).channel()
