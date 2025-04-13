@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 import json
 import xml.etree.ElementTree as ET
 
+
+
 class NationStatesSSE(commands.Cog):
     def __init__(self, bot: Red):
         self.bot = bot
