@@ -30,28 +30,45 @@ class NationStatesSSE(commands.Cog):
     @commands.command()
     async def setregion(self, ctx, *, region: str):
         await self.config.region.set(region.lower().replace(" ", "_"))
-        await ctx.send(f"Set SSE region to `{region}`. Reconnecting to new stream...")
-        if self.sse_task:
-            self.sse_task.cancel()
-        self.sse_task = self.bot.loop.create_task(self.sse_listener())
+        await ctx.send(f"Set SSE region to `{region}`.")
+        channel_id = await self.config.channel()
+        agent = await self.config.user_agent()
+        if all([channel_id, agent]):
+            if self.sse_task:
+                self.sse_task.cancel()
+            self.sse_task = self.bot.loop.create_task(self.sse_listener())
+            await ctx.send("Reconnected to new stream.")
 
     @commands.admin()
     @commands.command()
     async def setuseragent(self, ctx, *, agent: str):
         await self.config.user_agent.set(agent)
-        await ctx.send(f"User-Agent set to: `{agent}`. Reconnecting stream...")
-        if self.sse_task:
-            self.sse_task.cancel()
-        self.sse_task = self.bot.loop.create_task(self.sse_listener())
+        await ctx.send(f"User-Agent set to: `{agent}`.")
+        region = await self.config.region()
+        channel_id = await self.config.channel()
+        if all([region, channel_id]):
+            if self.sse_task:
+                self.sse_task.cancel()
+            self.sse_task = self.bot.loop.create_task(self.sse_listener())
+            await ctx.send("Reconnected to new stream.")
 
     @commands.admin()
     @commands.command()
     async def startsse(self, ctx):
         if self.sse_task and not self.sse_task.done():
             await ctx.send("SSE listener is already running.")
-        else:
-            self.sse_task = self.bot.loop.create_task(self.sse_listener())
-            await ctx.send("Started SSE listener.")
+            return
+
+        region = await self.config.region()
+        agent = await self.config.user_agent()
+        channel_id = await self.config.channel()
+
+        if not all([region, agent, channel_id]):
+            await ctx.send("❌ Cannot start SSE: Missing configuration. Please ensure region, user agent, and output channel are set.")
+            return
+
+        self.sse_task = self.bot.loop.create_task(self.sse_listener())
+        await ctx.send("✅ Started SSE listener.")
 
     @commands.admin()
     @commands.command()
@@ -62,6 +79,23 @@ class NationStatesSSE(commands.Cog):
             await ctx.send("Stopped SSE listener.")
         else:
             await ctx.send("SSE listener is not running.")
+
+    @commands.command()
+    async def sstatus(self, ctx):
+        region = await self.config.region()
+        agent = await self.config.user_agent()
+        channel_id = await self.config.channel()
+        channel = self.bot.get_channel(channel_id) if channel_id else None
+        running = self.sse_task and not self.sse_task.done()
+        await ctx.send(
+            f"**SSE Status:** {'🟢 Running' if running else '🔴 Not Running'}
+"
+            f"**Region:** `{region}`
+"
+            f"**User-Agent:** `{agent}`
+"
+            f"**Output Channel:** {channel.mention if channel else 'Not Set'}"
+        )
 
     @commands.command()
     async def viewsseurl(self, ctx):
