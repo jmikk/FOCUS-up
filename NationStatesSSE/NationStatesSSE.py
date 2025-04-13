@@ -9,14 +9,15 @@ from datetime import datetime, timedelta
 class NationStatesSSE(commands.Cog):
     def __init__(self, bot: Red):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=1357908643, force_registration=True)
-        self.config.register_guild(channel=None, whitelist=[], blacklist=[], region="", user_agent="")
+        self.config = Config.get_conf(self, identifier=1357908642, force_registration=True)
+        self.config.register_guild(channel=None, whitelist=[], blacklist=[], region="the_wellspring", user_agent="Redbot-SSE-Listener")
         self.session = aiohttp.ClientSession()
         self.sse_task = self.bot.loop.create_task(self.sse_listener())
         self.last_event_time = datetime.utcnow()
 
     def cog_unload(self):
         self.sse_task.cancel()
+        self.sse_task = None
         self.bot.loop.create_task(self.session.close())
 
     @commands.guild_only()
@@ -119,32 +120,40 @@ class NationStatesSSE(commands.Cog):
         await ctx.send(f"**Region:** {region}\n**Whitelist:** {wl}\n**Blacklist:** {bl}")
 
     async def sse_listener(self):
-        while True:
-            try:
-                for guild in self.bot.guilds:
-                    region = await self.config.guild(guild).region()
-                    url = f"https://www.nationstates.net/api/region:{region}"
-                    async with self.session.get(url, headers={"User-Agent": await self.config.guild(guild).user_agent()}) as resp:
-                        async for line in resp.content:
-                            if line == b'\n':
-                                continue
-                            line = line.decode("utf-8").strip()
-                            if line.startswith("data: "):
-                                self.last_event_time = datetime.utcnow()
-                                await self.handle_event(line[6:])
-            except Exception as e:
-                print("[SSE] Error:", e)
-                await asyncio.sleep(10)  # Retry delay
+        try:
+            guilds = [g async for g in self.config.all_guilds()]
+            if not guilds:
+                print("[SSE] No guilds configured for SSE listening.")
+                return
+            guild_id = list(guilds.keys())[0]  # just using the first guild's settings
+            region = guilds[guild_id].get("region", "the_wellspring")
+            agent = guilds[guild_id].get("user_agent", "Redbot-SSE-Listener")
+            url = f"https://www.nationstates.net/api/region:{region}"
 
-            # Heartbeat check
-            if datetime.utcnow() - self.last_event_time > timedelta(hours=1):
-                for guild in self.bot.guilds:
-                    channel_id = await self.config.guild(guild).channel()
-                    if channel_id:
-                        channel = guild.get_channel(channel_id)
-                        if channel:
-                            await channel.send("No events received in over an hour. Attempting to reconnect...")
-                self.last_event_time = datetime.utcnow()
+            async with self.session.get(url, headers={"User-Agent": agent}) as resp:
+                async for line in resp.content:
+                    if line == b'
+':
+                        continue
+                    line = line.decode("utf-8").strip()
+                    if line.startswith("data: "):
+                        self.last_event_time = datetime.utcnow()
+                        await self.handle_event(line[6:])
+
+        except asyncio.CancelledError:
+            print("[SSE] SSE listener cancelled.")
+        except Exception as e:
+            print("[SSE] Error:", e)
+            await asyncio.sleep(10)
+
+        if datetime.utcnow() - self.last_event_time > timedelta(hours=1):
+            for guild in self.bot.guilds:
+                channel_id = await self.config.guild(guild).channel()
+                if channel_id:
+                    channel = guild.get_channel(channel_id)
+                    if channel:
+                        await channel.send("No events received in over an hour. Attempting to reconnect...")
+            self.last_event_time = datetime.utcnow()
 
     async def handle_event(self, data):
         try:
