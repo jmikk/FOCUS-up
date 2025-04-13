@@ -134,19 +134,6 @@ class NationStatesSSE(commands.Cog):
 
             message = message.replace("&quot;",'"')
             # Special handling for RMB messages
-
-            
-            whitelist = await cfg.whitelist()
-            blacklist = await cfg.blacklist()
-            if whitelist and not any(word.lower() in message.lower() for word in whitelist):
-                return
-            if any(word.lower() in message.lower() for word in blacklist):
-                return
-
-
-            match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
-            flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
-            flag_url = flag_url.replace(".svg", ".png").replace("t2", "") if flag_url else None
             
             
             rmb_match = re.search(r'<a href="/region=(.*?)/page=display_region_rmb\?postid=(\d+)', html)
@@ -167,9 +154,6 @@ class NationStatesSSE(commands.Cog):
                         clean_text = re.sub(r"\[quote=(.*?);(\d+)](.*?)\[/quote]", "", message_text, flags=re.DOTALL).strip()
                           
                         embed = discord.Embed(title="New RMB Post", timestamp=datetime.utcnow())
-                        
-                        if flag_url:
-                            embed.set_thumbnail(url=flag_url)
                           
                           # Add quotes as separate fields
                         for author, _, quote in quotes:
@@ -181,7 +165,7 @@ class NationStatesSSE(commands.Cog):
 
                           # Updated post link format
                         post_url = f"https://www.nationstates.net/region={region}/page=display_region_rmb?postid={post_id}#p{post_id}"
-                        embed.set_footer(text=f"Posted by {nation}")
+                        embed.set_footer(text=f"Posted by {nation}", icon_url="https://www.nationstates.net/images/nation_icon.png")
                         embed.url = post_url
 
                         cfg = self.config.guild(guild)
@@ -203,10 +187,6 @@ class NationStatesSSE(commands.Cog):
                 message = message.replace(f'"<a href="page=dispatch/id={dispatch_id}">{dispatch_title}</a>"', 'a new')
 
                 embed = discord.Embed(title=dispatch_title, url=dispatch_url, description=message, timestamp=datetime.utcnow())
-
-                if flag_url:
-                    embed.set_thumbnail(url=flag_url)
-                
                 embed.set_footer(text=f"{dispatch_type} Dispatch")
                 cfg = self.config.guild(guild)
                 channel_id = await cfg.channel()
@@ -223,7 +203,9 @@ class NationStatesSSE(commands.Cog):
             elif re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
                 embed_title = "New Endorsement"
 
-
+            match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
+            flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
+            flag_url = flag_url.replace(".svg", ".png").replace("t2", "") if flag_url else None
 
             cfg = self.config.guild(guild)
             channel_id = await cfg.channel()
@@ -233,6 +215,13 @@ class NationStatesSSE(commands.Cog):
             if not channel:
                 return
 
+            whitelist = await cfg.whitelist()
+            blacklist = await cfg.blacklist()
+            if whitelist and not any(word.lower() in message.lower() for word in whitelist):
+                return
+            if any(word.lower() in message.lower() for word in blacklist):
+                return
+
             embed = discord.Embed(title=embed_title, description=message, timestamp=datetime.utcnow())
             if flag_url:
                 embed.set_thumbnail(url=flag_url)
@@ -240,4 +229,3 @@ class NationStatesSSE(commands.Cog):
 
         except Exception as e:
             print(f"[Event Handler] Error in {guild.name}:", e)
-
