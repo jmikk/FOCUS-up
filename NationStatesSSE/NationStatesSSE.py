@@ -104,7 +104,7 @@ class NationStatesSSE(commands.Cog):
         try:
             import json
             payload = json.loads(data)
-            message = payload.get("str")
+            message = payload.get("str") + " " + flag_url
             html = payload.get("htmlStr", "")
             
             # Extract image URL
