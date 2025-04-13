@@ -240,3 +240,4 @@ class NationStatesSSE(commands.Cog):
 
         except Exception as e:
             print(f"[Event Handler] Error in {guild.name}:", e)
+
