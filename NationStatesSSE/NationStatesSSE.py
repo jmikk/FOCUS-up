@@ -31,7 +31,7 @@ class NationStatesSSE(commands.Cog):
     async def setregion(self, ctx, *, region: str):
         await self.config.region.set(region.lower().replace(" ", "_"))
         await ctx.send(f"Set SSE region to `{region}`.")
-        channel_id = await self.config.channel()
+        channel_id = await self.config.channel
         agent = await self.config.user_agent()
         if all([channel_id, agent]):
             if self.sse_task:
@@ -88,7 +88,13 @@ class NationStatesSSE(commands.Cog):
         channel = self.bot.get_channel(channel_id) if channel_id else None
         running = self.sse_task and not self.sse_task.done()
         await ctx.send(
-            f"**SSE Status:** {'🟢 Running' if running else '🔴 Not Running'}" + f"**Region:** `{region}`" + f"**User-Agent:** `{agent}`" + f"**Output Channel:** {channel.mention if channel else 'Not Set'}"
+            f"**SSE Status:** {'🟢 Running' if running else '🔴 Not Running'}
+"
+            f"**Region:** `{region}`
+"
+            f"**User-Agent:** `{agent}`
+"
+            f"**Output Channel:** {channel.mention if channel else 'Not Set'}"
         )
 
     @commands.command()
@@ -206,3 +212,4 @@ class NationStatesSSE(commands.Cog):
 
         except Exception as e:
             print("[Event Handler] Error:", e)
+
