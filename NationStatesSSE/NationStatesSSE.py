@@ -88,11 +88,8 @@ class NationStatesSSE(commands.Cog):
 
     async def sse_listener(self, guild):
         cfg = self.config.guild(guild)
-        region = await cfg.region()
-        agent = await cfg.user_agent()
-        url = f"https://www.nationstates.net/api/region:{region}"
-        self.last_event_time[guild.id] = datetime.utcnow()
-        try:
+        while True:
+            try:
             async with self.session.get(url, headers={"User-Agent": agent}) as resp:
                 async for line in resp.content:
                     if line == b'\n':
@@ -101,15 +98,28 @@ class NationStatesSSE(commands.Cog):
                     if line.startswith("data: "):
                         self.last_event_time[guild.id] = datetime.utcnow()
                         await self.handle_event(guild, line[6:])
-                    else:
+                    elif line.startswith("heartbeat: ")
                         self.last_event_time[guild.id] = datetime.utcnow()
         except asyncio.CancelledError:
             print(f"[SSE] SSE listener cancelled for {guild.name}")
         except Exception as e:
-            print(f"[SSE] Error for {guild.name}:", e)
-            await asyncio.sleep(10)
+                print(f"[SSE] Error for {guild.name}:", e)
+                channel_id = await cfg.channel()
+                if channel_id:
+                    channel = self.bot.get_channel(channel_id)
+                    if channel:
+                        await channel.send(f"⚠️ SSE Error: `{e}`
+Reconnecting in 10 seconds...")
+                await asyncio.sleep(10)
+                continue
 
         if datetime.utcnow() - self.last_event_time[guild.id] > timedelta(hours=1):
+                channel_id = await cfg.channel()
+                if channel_id:
+                    channel = self.bot.get_channel(channel_id)
+                    if channel:
+                        await channel.send("⏳ No SSE events in over an hour. Reconnecting...")
+                continue
             channel_id = await cfg.channel()
             if channel_id:
                 channel = self.bot.get_channel(channel_id)
