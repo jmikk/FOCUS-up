@@ -166,7 +166,9 @@ class NationStatesSSE(commands.Cog):
                         return  # Don't continue with normal handling
 
             embed_title = "News from around the Well"
-            if re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
+            if message.lower().startswith("following new legislation"):
+                embed_title = "FOLLOWING NEW LEGISLATION"
+            elif re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
                 embed_title = "New Endorsement"
 
             match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
