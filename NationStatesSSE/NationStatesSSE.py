@@ -111,7 +111,8 @@ class NationStatesSSE(commands.Cog):
                     if channel_id:
                         channel = self.bot.get_channel(channel_id)
                         if channel:
-                            await channel.send(f"⚠️ SSE Error: `{e}` Reconnecting in 10 seconds...")
+                            if e:
+                                await channel.send(f"⚠️ SSE Error: `{e}` Reconnecting in 10 seconds...")
                     await asyncio.sleep(10)
                     continue    
                 
