@@ -104,7 +104,7 @@ class NationStatesSSE(commands.Cog):
         try:
             import json
             payload = json.loads(data)
-            message = payload.get("str") + " " + flag_url
+            message = payload.get("str")
             html = payload.get("htmlStr", "")
             
             # Extract image URL
@@ -128,7 +128,7 @@ class NationStatesSSE(commands.Cog):
                 if any(word.lower() in message.lower() for word in blacklist):
                     continue
 
-                embed = discord.Embed(description=message, timestamp=datetime.utcnow())
+                embed = discord.Embed(description=message+flag_url, timestamp=datetime.utcnow())
                 if flag_url:
                     embed.set_thumbnail(url=flag_url)
                 await channel.send(embed=embed)
