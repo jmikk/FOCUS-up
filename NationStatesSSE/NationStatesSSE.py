@@ -90,12 +90,15 @@ class NationStatesSSE(commands.Cog):
 
     async def sse_listener(self, guild):
         cfg = self.config.guild(guild)
+        self.last_event_time[guild.id] = datetime.utcnow()
         while True:
             try:
                 region = await cfg.region()
                 agent = await cfg.user_agent()
                 url = f"https://www.nationstates.net/api/region:{region}"
-                async with self.session.get(url, headers={"User-Agent": agent}) as resp:
+                timeout = aiohttp.ClientTimeout(total=None, sock_read=65)
+                async with self.session.get(url, headers={"User-Agent": agent}, timeout=timeout) as resp:
+                    print(f"[SSE] Connected to SSE feed for region {region}")
                     async for line in resp.content:
                         if line == b'\n':
                             continue
