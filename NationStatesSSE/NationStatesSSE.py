@@ -180,11 +180,11 @@ class NationStatesSSE(commands.Cog):
                             embed.set_thumbnail(url=flag_url) 
                           # Add quotes as separate fields
                         for author, _, quote in quotes:
-                            embed.add_field(name=f"Quoted from {author}", value=html.unescape(quote.strip()[:1024]), inline=False)
+                            embed.add_field(name=f"Quoted from {author}", value=quote.strip()[:1024], inline=False)
                           
                           # Add remaining message
                         if clean_text:
-                            embed.add_field(name="Message", value=html.unescape(clean_text[:1024]), inline=False)
+                            embed.add_field(name="Message", value=clean_text[:1024], inline=False)
 
                           # Updated post link format
                         post_url = f"https://www.nationstates.net/region={region}/page=display_region_rmb?postid={post_id}#p{post_id}"
