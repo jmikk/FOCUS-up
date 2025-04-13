@@ -5,6 +5,8 @@ import re
 from redbot.core import commands, Config
 from redbot.core.bot import Red
 from datetime import datetime, timedelta
+import json
+
 
 class NationStatesSSE(commands.Cog):
     def __init__(self, bot: Red):
@@ -99,6 +101,9 @@ class NationStatesSSE(commands.Cog):
                     if line.startswith("data: "):
                         self.last_event_time[guild.id] = datetime.utcnow()
                         await self.handle_event(guild, line[6:])
+                    else: 
+                        self.last_event_time[guild.id] = datetime.utcnow()
+                        
         except asyncio.CancelledError:
             print(f"[SSE] SSE listener cancelled for {guild.name}")
         except Exception as e:
@@ -115,7 +120,14 @@ class NationStatesSSE(commands.Cog):
 
     async def handle_event(self, guild, data):
         try:
-            import json
+
+
+            embed_title = None
+            if re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
+                embed_title = "New Endorsement"
+
+
+            
             payload = json.loads(data)
             message = payload.get("str")
             message = re.sub(r"@@(.*?)@@", lambda m: f"[{m.group(1)}](https://www.nationstates.net/nation={m.group(1).replace(' ', '_')})", message)
@@ -141,10 +153,6 @@ class NationStatesSSE(commands.Cog):
                 return
             if any(word.lower() in message.lower() for word in blacklist):
                 return
-
-            embed_title = None
-            if re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
-                embed_title = "New Endorsement"
 
             embed = discord.Embed(title=embed_title, description=message, timestamp=datetime.utcnow())
             if flag_url:
