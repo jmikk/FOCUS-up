@@ -7,6 +7,8 @@ from redbot.core.bot import Red
 from datetime import datetime, timedelta
 import json
 import xml.etree.ElementTree as ET
+import html
+
 
 
 class NationStatesSSE(commands.Cog):
@@ -168,6 +170,8 @@ class NationStatesSSE(commands.Cog):
                     if post_elem is not None:
                         message_text = post_elem.findtext("MESSAGE")
                         nation = post_elem.findtext("NATION")
+                        message_text = html.unescape(message_text)
+
                           
                           # Extract quote blocks
                         quotes = re.findall(r"\[quote=(.*?);(\d+)](.*?)\[/quote]", message_text, re.DOTALL)
