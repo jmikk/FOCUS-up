@@ -10,7 +10,7 @@ class NationStatesSSE(commands.Cog):
     def __init__(self, bot: Red):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1357908642, force_registration=True)
-        self.config.register_guild(channel=None, whitelist=[], blacklist=[])
+        self.config.register_guild(channel=None, whitelist=[], blacklist=[], region="the_wellspring")
         self.session = aiohttp.ClientSession()
         self.sse_task = self.bot.loop.create_task(self.sse_listener())
         self.last_event_time = datetime.utcnow()
@@ -25,6 +25,13 @@ class NationStatesSSE(commands.Cog):
     async def setchannel(self, ctx, channel: discord.TextChannel):
         await self.config.guild(ctx.guild).channel.set(channel.id)
         await ctx.send(f"Set event output channel to {channel.mention}")
+
+    @commands.guild_only()
+    @commands.admin()
+    @commands.command()
+    async def setregion(self, ctx, *, region: str):
+        await self.config.guild(ctx.guild).region.set(region.lower().replace(" ", "_"))
+        await ctx.send(f"Set SSE region to `{region}`.")
 
     @commands.guild_only()
     @commands.admin()
@@ -73,19 +80,23 @@ class NationStatesSSE(commands.Cog):
     async def viewfilters(self, ctx):
         wl = await self.config.guild(ctx.guild).whitelist()
         bl = await self.config.guild(ctx.guild).blacklist()
-        await ctx.send(f"**Whitelist:** {wl}\n**Blacklist:** {bl}")
+        region = await self.config.guild(ctx.guild).region()
+        await ctx.send(f"**Region:** {region}\n**Whitelist:** {wl}\n**Blacklist:** {bl}")
 
     async def sse_listener(self):
         while True:
             try:
-                async with self.session.get("https://www.nationstates.net/api/region:the_wellspring", headers={"User-Agent": "Redbot-SSE-Listener"}) as resp:
-                    async for line in resp.content:
-                        if line == b'\n':
-                            continue
-                        line = line.decode("utf-8").strip()
-                        if line.startswith("data: "):
-                            self.last_event_time = datetime.utcnow()
-                            await self.handle_event(line[6:])
+                for guild in self.bot.guilds:
+                    region = await self.config.guild(guild).region()
+                    url = f"https://www.nationstates.net/api/region:{region}"
+                    async with self.session.get(url, headers={"User-Agent": "Redbot-SSE-Listener"}) as resp:
+                        async for line in resp.content:
+                            if line == b'\n':
+                                continue
+                            line = line.decode("utf-8").strip()
+                            if line.startswith("data: "):
+                                self.last_event_time = datetime.utcnow()
+                                await self.handle_event(line[6:])
             except Exception as e:
                 print("[SSE] Error:", e)
                 await asyncio.sleep(10)  # Retry delay
@@ -108,7 +119,7 @@ class NationStatesSSE(commands.Cog):
             html = payload.get("htmlStr", "")
             
             # Extract image URL (supports both PNG and SVG formats)
-            match = re.search(r'src=\"(/images/flags/.*?\.(?:png|svg))\"', html)
+            match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
             flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
 
             # Go through all guilds
@@ -128,7 +139,7 @@ class NationStatesSSE(commands.Cog):
                 if any(word.lower() in message.lower() for word in blacklist):
                     continue
 
-                embed = discord.Embed(description=message+flag_url, timestamp=datetime.utcnow())
+                embed = discord.Embed(description=message, timestamp=datetime.utcnow())
                 if flag_url:
                     embed.set_thumbnail(url=flag_url)
                 await channel.send(embed=embed)
