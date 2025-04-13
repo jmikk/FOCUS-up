@@ -132,8 +132,7 @@ class NationStatesSSE(commands.Cog):
             html = payload.get("htmlStr", "")
             message = re.sub(r"@@(.*?)@@", lambda m: f"[{m.group(1)}](https://www.nationstates.net/nation={m.group(1).replace(' ', '_')})", message)
             message = re.sub(r"%%(.*?)%%", lambda m: f"[{m.group(1)}](https://www.nationstates.net/region={m.group(1).replace(' ', '_')})", message)
-            message = message.replace("&eacute;","é").replace("[/i]","*").replace("[i],"*").replace("[/b]","*").replace("[b],"*")
-            
+            message = message.replace("&eacute;","é").replace("[/i]","*").replace("[i]","*").replace("[/b]","**").replace("[b]","**").replace("[spoiler=","||").replace("[/spoiler]","||").replace("]","")            
             match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
             flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
             flag_url = flag_url.replace(".svg", ".png").replace("t2", "") if flag_url else None
