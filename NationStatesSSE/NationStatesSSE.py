@@ -122,7 +122,7 @@ class NationStatesSSE(commands.Cog):
         try:
 
 
-            embed_title = None
+            embed_title = "News from around the Well"
             if re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
                 embed_title = "New Endorsement"
 
