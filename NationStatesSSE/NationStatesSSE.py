@@ -176,7 +176,6 @@ class NationStatesSSE(commands.Cog):
 
 
                 message = message.replace(f'"<a href="page=dispatch/id={dispatch_id}">{dispatch_title}</a>"', 'a new')
-Bulletin: News).
 
                 embed = discord.Embed(title=dispatch_title, url=dispatch_url, description=message, timestamp=datetime.utcnow())
                 embed.set_footer(text=f"{dispatch_type} Dispatch")
