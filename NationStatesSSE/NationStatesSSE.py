@@ -81,20 +81,6 @@ class NationStatesSSE(commands.Cog):
             await ctx.send("SSE listener is not running.")
 
     @commands.command()
-    async def sstatus(self, ctx):
-        region = await self.config.region() or None
-        agent = await self.config.user_agent() or None
-        channel_id = await self.config.channel() or None
-        channel = self.bot.get_channel(channel_id) if channel_id else None
-        running = self.sse_task and not self.sse_task.done()
-        await ctx.send(
-            f"**SSE Status:** {'🟢 Running' if running else '🔴 Not Running'}"+
-            f"**Region:** `{region}`"+
-            f"**User-Agent:** `{agent}`"+
-            f"**Output Channel:** {channel.mention if channel else 'Not Set'}"
-        )
-
-    @commands.command()
     async def viewsseurl(self, ctx):
         region = await self.config.region()
         url = f"https://www.nationstates.net/api/region:{region}"
