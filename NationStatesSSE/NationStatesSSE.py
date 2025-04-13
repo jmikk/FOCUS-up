@@ -111,8 +111,7 @@ class NationStatesSSE(commands.Cog):
                     if channel_id:
                         channel = self.bot.get_channel(channel_id)
                         if channel:
-                            if len(e)>1:
-                                await channel.send(f"⚠️ SSE Error: `{e}` Reconnecting in 10 seconds...")
+                            await channel.send(f"⚠️ SSE Error: `{e}` Reconnecting in 10 seconds...")
                     await asyncio.sleep(10)
                     continue    
                 
@@ -166,10 +165,26 @@ class NationStatesSSE(commands.Cog):
                                 await channel.send(embed=embed)
                         return  # Don't continue with normal handling
 
+            dispatch_match = re.search(r'published \"<a href=\\"page=dispatch/id=(\\d+)\\">(.*?)<\\/a>\" \\((.*?)\\)', message)
+            if dispatch_match:
+                dispatch_id = dispatch_match.group(1)
+                dispatch_title = dispatch_match.group(2)
+                dispatch_type = dispatch_match.group(3)
+                dispatch_url = f"https://www.nationstates.net/page=dispatch/id={dispatch_id}"
+
+                embed = discord.Embed(title=dispatch_title, url=dispatch_url, timestamp=datetime.utcnow())
+                embed.set_footer(text=f"{dispatch_type} Dispatch")
+                cfg = self.config.guild(guild)
+                channel_id = await cfg.channel()
+                if channel_id:
+                    channel = self.bot.get_channel(channel_id)
+                    if channel:
+                        await channel.send(embed=embed)
+                return
+
             embed_title = "News from around the Well"
             if message.lower().startswith("following new legislation"):
                 embed_title = "FOLLOWING NEW LEGISLATION"
-                message = message.replace("Following new legislation in","In")
             elif re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
                 embed_title = "New Endorsement"
 
