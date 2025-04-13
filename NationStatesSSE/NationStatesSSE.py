@@ -32,9 +32,6 @@ class NationStatesSSE(commands.Cog):
     async def setregion(self, ctx, *, region: str):
         await self.config.guild(ctx.guild).region.set(region.lower().replace(" ", "_"))
         await ctx.send(f"Set SSE region to `{region}`. Reconnecting to new stream...")
-        if self.sse_task:
-            self.sse_task.cancel()
-        self.sse_task = self.bot.loop.create_task(self.sse_listener())
 
     @commands.guild_only()
     @commands.admin()
