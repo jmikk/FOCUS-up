@@ -120,16 +120,15 @@ class NationStatesSSE(commands.Cog):
 
     async def handle_event(self, guild, data):
         try:
-
+        
+            payload = json.loads(data)
+            message = payload.get("str")
 
             embed_title = "News from around the Well"
             if re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
                 embed_title = "New Endorsement"
-
-
+                
             
-            payload = json.loads(data)
-            message = payload.get("str")
             message = re.sub(r"@@(.*?)@@", lambda m: f"[{m.group(1)}](https://www.nationstates.net/nation={m.group(1).replace(' ', '_')})", message)
             html = payload.get("htmlStr", "")
 
