@@ -124,6 +124,8 @@ class NationStatesSSE(commands.Cog):
             html = payload.get("htmlStr", "")
             message = re.sub(r"@@(.*?)@@", lambda m: f"[{m.group(1)}](https://www.nationstates.net/nation={m.group(1).replace(' ', '_')})", message)
 
+            message.replace("&quot",'"')
+            
             # Special handling for RMB messages
             rmb_match = re.search(r'<a href="/region=(.*?)/page=display_region_rmb\?postid=(\d+)', html)
             if rmb_match:
