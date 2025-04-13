@@ -164,13 +164,15 @@ class NationStatesSSE(commands.Cog):
                             if channel:
                                 await channel.send(embed=embed)
                         return  # Don't continue with normal handling
+                
+                dispatch_match = re.search(r'([a-z0-9_]+) published "<a href="page=dispatch/id=(\d+)">(.*?)</a>" \((.*?)\)', message, re.IGNORECASE)
+                if dispatch_match:
+                    author = dispatch_match.group(1)
+                    dispatch_id = dispatch_match.group(2)
+                    dispatch_title = dispatch_match.group(3)
+                    dispatch_type = dispatch_match.group(4)
+                    dispatch_url = f"https://www.nationstates.net/nation={author}/detail={dispatch_type.split(':')[0].strip().lower()}/id={dispatch_id}"
 
-            dispatch_match = re.search(r'published \"<a href=\\"page=dispatch/id=(\\d+)\\">(.*?)<\\/a>\" \\((.*?)\\)', message)
-            if dispatch_match:
-                dispatch_id = dispatch_match.group(1)
-                dispatch_title = dispatch_match.group(2)
-                dispatch_type = dispatch_match.group(3)
-                dispatch_url = f"https://www.nationstates.net/page=dispatch/id={dispatch_id}"
 
                 embed = discord.Embed(title=dispatch_title, url=dispatch_url, timestamp=datetime.utcnow())
                 embed.set_footer(text=f"{dispatch_type} Dispatch")
