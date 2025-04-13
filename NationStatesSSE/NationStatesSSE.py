@@ -125,6 +125,8 @@ class NationStatesSSE(commands.Cog):
 
             message = message.replace("&quot;",'"')
             # Special handling for RMB messages
+            
+            
             rmb_match = re.search(r'<a href="/region=(.*?)/page=display_region_rmb\?postid=(\d+)', html)
             if rmb_match:
                 region = rmb_match.group(1)
@@ -172,7 +174,7 @@ class NationStatesSSE(commands.Cog):
                 dispatch_type = dispatch_match.group(3)
                 dispatch_url = f"https://www.nationstates.net/page=dispatch/id={dispatch_id}"
 
-                embed = discord.Embed(title=dispatch_title, url=dispatch_url, description=f"Posted by [{author}](https://www.nationstates.net/nation={author})", timestamp=datetime.utcnow())
+                embed = discord.Embed(title=dispatch_title, url=dispatch_url, description=message, timestamp=datetime.utcnow())
                 embed.set_footer(text=f"{dispatch_type} Dispatch")
                 cfg = self.config.guild(guild)
                 channel_id = await cfg.channel()
