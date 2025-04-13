@@ -110,6 +110,7 @@ class NationStatesSSE(commands.Cog):
             # Extract image URL
             match = re.search(r'src=\"(/images/flags/uploads/.*?)\"', html)
             flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
+            flag_url = flag_url.replace("t2","")
 
             # Go through all guilds
             for guild in self.bot.guilds:
@@ -130,7 +131,7 @@ class NationStatesSSE(commands.Cog):
 
                 embed = discord.Embed(description=message, timestamp=datetime.utcnow())
                 if flag_url:
-                    embed.set_thumbnail(url=flag_url+"t2")
+                    embed.set_thumbnail(url=flag_url)
                 await channel.send(embed=embed)
 
         except Exception as e:
