@@ -106,6 +106,12 @@ class NationStatesSSE(commands.Cog):
         self.sse_task = self.bot.loop.create_task(self.sse_listener())
 
     @commands.command()
+    async def viewsseurl(self, ctx):
+        region = await self.config.guild(ctx.guild).region()
+        url = f"https://www.nationstates.net/api/region:{region}"
+        await ctx.send(f"Current SSE URL: <{url}>")
+
+    @commands.command()
     async def viewfilters(self, ctx):
         wl = await self.config.guild(ctx.guild).whitelist()
         bl = await self.config.guild(ctx.guild).blacklist()
