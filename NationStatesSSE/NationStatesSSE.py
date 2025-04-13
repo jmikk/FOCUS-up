@@ -82,9 +82,9 @@ class NationStatesSSE(commands.Cog):
 
     @commands.command()
     async def sstatus(self, ctx):
-        region = await self.config.region
-        agent = await self.config.user_agent
-        channel_id = await self.config.channel
+        region = await self.config.region()
+        agent = await self.config.user_agent()
+        channel_id = await self.config.channel() or None
         channel = self.bot.get_channel(channel_id) if channel_id else None
         running = self.sse_task and not self.sse_task.done()
         await ctx.send(
