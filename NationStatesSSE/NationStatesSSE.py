@@ -6,7 +6,7 @@ from redbot.core import commands, Config
 from redbot.core.bot import Red
 from datetime import datetime, timedelta
 import json
-
+import xml.etree.ElementTree as ET
 
 class NationStatesSSE(commands.Cog):
     def __init__(self, bot: Red):
@@ -101,9 +101,8 @@ class NationStatesSSE(commands.Cog):
                     if line.startswith("data: "):
                         self.last_event_time[guild.id] = datetime.utcnow()
                         await self.handle_event(guild, line[6:])
-                    else: 
+                    else:
                         self.last_event_time[guild.id] = datetime.utcnow()
-                        
         except asyncio.CancelledError:
             print(f"[SSE] SSE listener cancelled for {guild.name}")
         except Exception as e:
@@ -120,17 +119,39 @@ class NationStatesSSE(commands.Cog):
 
     async def handle_event(self, guild, data):
         try:
-        
             payload = json.loads(data)
             message = payload.get("str")
+            html = payload.get("htmlStr", "")
+            message = re.sub(r"@@(.*?)@@", lambda m: f"[{m.group(1)}](https://www.nationstates.net/nation={m.group(1).replace(' ', '_')})", message)
+
+            # Special handling for RMB messages
+            rmb_match = re.search(r'<a href="/region=(.*?)/page=display_region_rmb\?postid=(\d+)', html)
+            if rmb_match:
+                region = rmb_match.group(1)
+                post_id = rmb_match.group(2)
+                url = f"https://www.nationstates.net/cgi-bin/api.cgi?region={region}&q=messages&fromid={post_id}"
+                async with self.session.get(url, headers={"User-Agent": "Redbot-SSE-Listener"}) as r:
+                    xml_text = await r.text()
+                    root = ET.fromstring(xml_text)
+                    post_elem = root.find(".//POST")
+                    if post_elem is not None:
+                        message_text = post_elem.findtext("MESSAGE")
+                        nation = post_elem.findtext("NATION")
+                        embed = discord.Embed(title="New RMB Post", description=message_text, timestamp=datetime.utcnow())
+                        post_url = f"https://www.nationstates.net/page=display_region_rmb/postid={post_id}"
+                        embed.set_footer(text=f"Posted by {nation} | View Post", icon_url="https://www.nationstates.net/images/nation_icon.png")
+                        embed.url = post_url
+                        cfg = self.config.guild(guild)
+                        channel_id = await cfg.channel()
+                        if channel_id:
+                            channel = self.bot.get_channel(channel_id)
+                            if channel:
+                                await channel.send(embed=embed)
+                        return  # Don't continue with normal handling
 
             embed_title = "News from around the Well"
             if re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
                 embed_title = "New Endorsement"
-                
-            
-            message = re.sub(r"@@(.*?)@@", lambda m: f"[{m.group(1)}](https://www.nationstates.net/nation={m.group(1).replace(' ', '_')})", message)
-            html = payload.get("htmlStr", "")
 
             match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
             flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
@@ -140,14 +161,12 @@ class NationStatesSSE(commands.Cog):
             channel_id = await cfg.channel()
             if not channel_id:
                 return
-
             channel = self.bot.get_channel(channel_id)
             if not channel:
                 return
 
             whitelist = await cfg.whitelist()
             blacklist = await cfg.blacklist()
-
             if whitelist and not any(word.lower() in message.lower() for word in whitelist):
                 return
             if any(word.lower() in message.lower() for word in blacklist):
