@@ -98,7 +98,7 @@ class NationStatesSSE(commands.Cog):
                         if line.startswith("data: "):
                             self.last_event_time[guild.id] = datetime.utcnow()
                             await self.handle_event(guild, line[6:])
-                        elif line.startswith("heartbeat: ")
+                        elif line.startswith("heartbeat: "):
                             self.last_event_time[guild.id] = datetime.utcnow()
             except asyncio.CancelledError:
                 print(f"[SSE] SSE listener cancelled for {guild.name}")
