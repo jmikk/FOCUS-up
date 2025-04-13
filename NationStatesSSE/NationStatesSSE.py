@@ -32,6 +32,9 @@ class NationStatesSSE(commands.Cog):
     async def setregion(self, ctx, *, region: str):
         await self.config.guild(ctx.guild).region.set(region.lower().replace(" ", "_"))
         await ctx.send(f"Set SSE region to `{region}`. Reconnecting to new stream...")
+        if self.sse_task:
+            self.sse_task.cancel()
+        self.sse_task = self.bot.loop.create_task(self.sse_listener())
 
     @commands.guild_only()
     @commands.admin()
@@ -76,6 +79,22 @@ class NationStatesSSE(commands.Cog):
             await ctx.send("Word not in blacklist.")
 
     @commands.guild_only()
+    @commands.command()
+    async def startsse(self, ctx):
+        if self.sse_task and not self.sse_task.done():
+            await ctx.send("SSE listener is already running.")
+        else:
+            self.sse_task = self.bot.loop.create_task(self.sse_listener())
+            await ctx.send("Started SSE listener.")
+
+    @commands.command()
+    async def stopsse(self, ctx):
+        if self.sse_task:
+            self.sse_task.cancel()
+            await ctx.send("Stopped SSE listener.")
+        else:
+            await ctx.send("SSE listener is not running.")
+
     @commands.command()
     async def viewfilters(self, ctx):
         wl = await self.config.guild(ctx.guild).whitelist()
