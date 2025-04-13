@@ -116,7 +116,8 @@ class NationStatesSSE(commands.Cog):
                 if channel_id:
                     channel = self.bot.get_channel(channel_id)
                     if channel:
-                        await channel.send(f"⚠️ SSE Error: `{e}`")
+                        if len(e)>1:
+                            await channel.send(f"⚠️ SSE Error: `{e}`")
                 if "Session is closed" in str(e):
                     if guild.id in self.sse_tasks:
                         del self.sse_tasks[guild.id]
