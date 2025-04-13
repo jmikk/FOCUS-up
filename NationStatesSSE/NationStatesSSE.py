@@ -119,6 +119,10 @@ class NationStatesSSE(commands.Cog):
             payload = json.loads(data)
             message = payload.get("str")
             message = re.sub(r"@@(.*?)@@", lambda m: f"[{m.group(1)}](https://www.nationstates.net/nation={m.group(1).replace(' ', '_')})", message)
+
+            #%%the_north_pacific%
+            message = re.sub(r"%%(.*?)%%", lambda m: f"[{m.group(1)}](https://www.nationstates.net/region={m.group(1).replace(' ', '_')})", message)
+
             html = payload.get("htmlStr", "")
 
             match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
