@@ -172,7 +172,7 @@ class NationStatesSSE(commands.Cog):
                 dispatch_type = dispatch_match.group(3)
                 dispatch_url = f"https://www.nationstates.net/page=dispatch/id={dispatch_id}"
 
-                embed = discord.Embed(title=dispatch_title, url=dispatch_url, timestamp=datetime.utcnow())
+                embed = discord.Embed(title=dispatch_title, url=dispatch_url, description=f"Posted by [{author}](https://www.nationstates.net/nation={author})", timestamp=datetime.utcnow())
                 embed.set_footer(text=f"{dispatch_type} Dispatch")
                 cfg = self.config.guild(guild)
                 channel_id = await cfg.channel()
