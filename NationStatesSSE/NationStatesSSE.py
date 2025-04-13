@@ -10,7 +10,7 @@ class NationStatesSSE(commands.Cog):
     def __init__(self, bot: Red):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1357908642, force_registration=True)
-        self.config.register_guild(channel=None, whitelist=[], blacklist=[], region="the_wellspring", user_agent="Redbot-SSE-Listener")
+        self.config.register_guild(channel=None, whitelist=[], blacklist=[], region="", user_agent="")
         self.session = aiohttp.ClientSession()
         self.sse_task = self.bot.loop.create_task(self.sse_listener())
         self.last_event_time = datetime.utcnow()
