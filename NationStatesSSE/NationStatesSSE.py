@@ -116,12 +116,13 @@ class NationStatesSSE(commands.Cog):
             import json
             payload = json.loads(data)
             message = payload.get("str")
+            message = re.sub(r"@@(.*?)@@", lambda m: f"[{m.group(1)}](https://www.nationstates.net/nation={m.group(1).replace(' ', '_')})", message)
             html = payload.get("htmlStr", "")
             
             # Extract image URL (supports both PNG and SVG formats)
             match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
             flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
-            flag_url = flag_url.replace(".svg",".png")
+
             # Go through all guilds
             for guild in self.bot.guilds:
                 channel_id = await self.config.guild(guild).channel()
@@ -139,7 +140,7 @@ class NationStatesSSE(commands.Cog):
                 if any(word.lower() in message.lower() for word in blacklist):
                     continue
 
-                embed = discord.Embed(description=message+flag_url, timestamp=datetime.utcnow())
+                embed = discord.Embed(description=message, timestamp=datetime.utcnow())
                 if flag_url:
                     embed.set_thumbnail(url=flag_url)
                 await channel.send(embed=embed)
