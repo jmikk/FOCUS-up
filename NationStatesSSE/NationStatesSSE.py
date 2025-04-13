@@ -132,8 +132,7 @@ class NationStatesSSE(commands.Cog):
 
             async with self.session.get(url, headers={"User-Agent": agent}) as resp:
                 async for line in resp.content:
-                    if line == b'
-':
+                    if line == b'':
                         continue
                     line = line.decode("utf-8").strip()
                     if line.startswith("data: "):
