@@ -23,7 +23,7 @@ class NationStatesSSE(commands.Cog):
     @commands.admin()
     @commands.command()
     async def setchannel(self, ctx, channel: discord.TextChannel):
-        await self.config.set("channel", channel.id)
+        await self.config.channel.set(channel.id)
         await ctx.send(f"Set event output channel to {channel.mention}")
 
     @commands.admin()
