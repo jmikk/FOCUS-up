@@ -126,12 +126,33 @@ class NationStatesSSE(commands.Cog):
                 
     async def handle_event(self, guild, data):
         try:
+
             payload = json.loads(data)
             message = payload.get("str")
             html = payload.get("htmlStr", "")
             message = re.sub(r"@@(.*?)@@", lambda m: f"[{m.group(1)}](https://www.nationstates.net/nation={m.group(1).replace(' ', '_')})", message)
             message = re.sub(r"%%(.*?)%%", lambda m: f"[{m.group(1)}](https://www.nationstates.net/region={m.group(1).replace(' ', '_')})", message)
 
+            
+            match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
+            flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
+            flag_url = flag_url.replace(".svg", ".png").replace("t2", "") if flag_url else None
+
+            cfg = self.config.guild(guild)
+            channel_id = await cfg.channel()
+            if not channel_id:
+                return
+            channel = self.bot.get_channel(channel_id)
+            if not channel:
+                return
+
+            whitelist = await cfg.whitelist()
+            blacklist = await cfg.blacklist()
+            if whitelist and not any(word.lower() in message.lower() for word in whitelist):
+                return
+            if any(word.lower() in message.lower() for word in blacklist):
+                return
+            
             message = message.replace("&quot;",'"')
             # Special handling for RMB messages
             
@@ -202,25 +223,6 @@ class NationStatesSSE(commands.Cog):
                 message = message.replace("Following new legislation in","In")
             elif re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
                 embed_title = "New Endorsement"
-
-            match = re.search(r'src=\"(/images/flags/uploads/[^\"]+\.png|/images/flags/[^\"/]+\.svg)\"', html)
-            flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
-            flag_url = flag_url.replace(".svg", ".png").replace("t2", "") if flag_url else None
-
-            cfg = self.config.guild(guild)
-            channel_id = await cfg.channel()
-            if not channel_id:
-                return
-            channel = self.bot.get_channel(channel_id)
-            if not channel:
-                return
-
-            whitelist = await cfg.whitelist()
-            blacklist = await cfg.blacklist()
-            if whitelist and not any(word.lower() in message.lower() for word in whitelist):
-                return
-            if any(word.lower() in message.lower() for word in blacklist):
-                return
 
             embed = discord.Embed(title=embed_title, description=message, timestamp=datetime.utcnow())
             if flag_url:
