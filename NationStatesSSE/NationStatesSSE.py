@@ -111,21 +111,7 @@ class NationStatesSSE(commands.Cog):
                             await channel.send(f"⚠️ SSE Error: `{e}` Reconnecting in 10 seconds...")
                     await asyncio.sleep(10)
                     continue    
-
-        if datetime.utcnow() - self.last_event_time[guild.id] > timedelta(hours=1):
-                channel_id = await cfg.channel()
-                if channel_id:
-                    channel = self.bot.get_channel(channel_id)
-                    if channel:
-                        await channel.send("⏳ No SSE events in over an hour. Reconnecting...")
-                continue
-            channel_id = await cfg.channel()
-            if channel_id:
-                channel = self.bot.get_channel(channel_id)
-                if channel:
-                    await channel.send("No events received in over an hour. Attempting to reconnect...")
-            self.last_event_time[guild.id] = datetime.utcnow()
-
+                
     async def handle_event(self, guild, data):
         try:
             payload = json.loads(data)
