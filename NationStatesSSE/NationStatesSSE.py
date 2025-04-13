@@ -90,6 +90,9 @@ class NationStatesSSE(commands.Cog):
         cfg = self.config.guild(guild)
         while True:
             try:
+                region = await cfg.region()
+                agent = await cfg.user_agent()
+                url = f"https://www.nationstates.net/api/region:{region}"
                 async with self.session.get(url, headers={"User-Agent": agent}) as resp:
                     async for line in resp.content:
                         if line == b'\n':
@@ -192,5 +195,3 @@ class NationStatesSSE(commands.Cog):
 
         except Exception as e:
             print(f"[Event Handler] Error in {guild.name}:", e)
-
-
