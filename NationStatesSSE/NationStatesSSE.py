@@ -108,12 +108,16 @@ class NationStatesSSE(commands.Cog):
             except asyncio.CancelledError:
                 print(f"[SSE] SSE listener cancelled for {guild.name}")
             except Exception as e:
-                    print(f"[SSE] Error for {guild.name}:", e)
-                    channel_id = await cfg.channel()
-                    if channel_id:
-                        channel = self.bot.get_channel(channel_id)
-                        if channel:
-                            await channel.send(f"⚠️ SSE Error: `{e}`")
+                print(f"[SSE] Error for {guild.name}:", e)
+                channel_id = await cfg.channel()
+                if channel_id:
+                    channel = self.bot.get_channel(channel_id)
+                    if channel:
+                        await channel.send(f"⚠️ SSE Error: `{e}`")
+                if "Session is closed" in str(e):
+                    if guild.id in self.sse_tasks:
+                        del self.sse_tasks[guild.id]
+                    break
                     if e == "Session is closed" or e == "SSL shutdown timed out":
                         break
                     await asyncio.sleep(10)
