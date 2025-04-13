@@ -170,7 +170,7 @@ class NationStatesSSE(commands.Cog):
                                 await channel.send(embed=embed)
                         return  # Don't continue with normal handling
             
-            dispatch_match = re.search(r'([a-z0-9_]+) published \"<a href=\"page=dispatch/id=(\d+)\">(.*?)</a>\" \((.*?)\)', html.unescape(html), re.IGNORECASE)"<a href="page=dispatch/id=(\d+)">(.*?)</a>" \((.*?)\)', message, re.IGNORECASE)
+            dispatch_match = re.search(r'([a-z0-9_]+) published \"<a href=\\"page=dispatch/id=(\\d+)\\">(.*?)</a>\" \((.*?)\)', html.unescape(html), re.IGNORECASE)            
             if dispatch_match:
                 author = dispatch_match.group(1)
                 dispatch_id = dispatch_match.group(2)
