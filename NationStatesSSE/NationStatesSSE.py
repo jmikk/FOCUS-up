@@ -88,13 +88,7 @@ class NationStatesSSE(commands.Cog):
         channel = self.bot.get_channel(channel_id) if channel_id else None
         running = self.sse_task and not self.sse_task.done()
         await ctx.send(
-            f"**SSE Status:** {'🟢 Running' if running else '🔴 Not Running'}
-"
-            f"**Region:** `{region}`
-"
-            f"**User-Agent:** `{agent}`
-"
-            f"**Output Channel:** {channel.mention if channel else 'Not Set'}"
+            f"**SSE Status:** {'🟢 Running' if running else '🔴 Not Running'}" + f"**Region:** `{region}`" + f"**User-Agent:** `{agent}`" + f"**Output Channel:** {channel.mention if channel else 'Not Set'}"
         )
 
     @commands.command()
