@@ -7,8 +7,6 @@ from redbot.core.bot import Red
 from datetime import datetime, timedelta
 import json
 import xml.etree.ElementTree as ET
-import html
-
 
 class NationStatesSSE(commands.Cog):
     def __init__(self, bot: Red):
@@ -90,15 +88,12 @@ class NationStatesSSE(commands.Cog):
 
     async def sse_listener(self, guild):
         cfg = self.config.guild(guild)
-        self.last_event_time[guild.id] = datetime.utcnow()
         while True:
             try:
                 region = await cfg.region()
                 agent = await cfg.user_agent()
                 url = f"https://www.nationstates.net/api/region:{region}"
-                timeout = aiohttp.ClientTimeout(total=None, sock_read=65)
-                async with self.session.get(url, headers={"User-Agent": agent}, timeout=timeout) as resp:
-                    print(f"[SSE] Connected to SSE feed for region {region}")
+                async with self.session.get(url, headers={"User-Agent": agent}) as resp:
                     async for line in resp.content:
                         if line == b'\n':
                             continue
@@ -169,14 +164,13 @@ class NationStatesSSE(commands.Cog):
                             if channel:
                                 await channel.send(embed=embed)
                         return  # Don't continue with normal handling
-            
-            dispatch_match = re.search(r'([a-z0-9_]+) published \"<a href=\\"page=dispatch/id=(\\d+)\\">(.*?)</a>\" \((.*?)\)', html.unescape(html), re.IGNORECASE)            
+
+            dispatch_match = re.search(r'published \"<a href=\"page=dispatch/id=(\d+)\">(.*?)<\/a>\" \((.*?)\)', message)
             if dispatch_match:
-                author = dispatch_match.group(1)
-                dispatch_id = dispatch_match.group(2)
-                dispatch_title = dispatch_match.group(3)
-                dispatch_type = dispatch_match.group(4)
-                dispatch_url = f"https://www.nationstates.net/nation={author}/detail={dispatch_type.split(':')[0].strip().lower()}/id={dispatch_id}"
+                dispatch_id = dispatch_match.group(1)
+                dispatch_title = dispatch_match.group(2)
+                dispatch_type = dispatch_match.group(3)
+                dispatch_url = f"https://www.nationstates.net/page=dispatch/id={dispatch_id}"
 
                 embed = discord.Embed(title=dispatch_title, url=dispatch_url, timestamp=datetime.utcnow())
                 embed.set_footer(text=f"{dispatch_type} Dispatch")
