@@ -18,7 +18,9 @@ class NationStatesSSE(commands.Cog):
         self.last_event_time = {}
 
     def cog_unload(self):
-        for task in self.sse_tasks.values():
+        for guild_id, task in list(self.sse_tasks.items()):
+            task.cancel()
+            del self.sse_tasks[guild_id]
             task.cancel()
         self.bot.loop.create_task(self.session.close())
 
