@@ -107,10 +107,9 @@ class NationStatesSSE(commands.Cog):
             message = payload.get("str")
             html = payload.get("htmlStr", "")
             
-            # Extract image URL
-            match = re.search(r'src=\"(/images/flags/uploads/.*?)\"', html)
+            # Extract image URL (supports both PNG and SVG formats)
+            match = re.search(r'src=\"(/images/flags/.*?\.(?:png|svg))\"', html)
             flag_url = f"https://www.nationstates.net{match.group(1)}" if match else None
-            flag_url = flag_url.replace("t2","")
 
             # Go through all guilds
             for guild in self.bot.guilds:
