@@ -116,7 +116,7 @@ class NationStatesSSE(commands.Cog):
                         if channel:
                             await channel.send(f"⚠️ SSE Error: `{e}`")
                     if e == "Session is closed" or e == "SSL shutdown timed out":
-                        return
+                        break
                     await asyncio.sleep(10)
                     continue    
                 
