@@ -135,27 +135,27 @@ class NationStatesSSE(commands.Cog):
                     root = ET.fromstring(xml_text)
                     post_elem = root.find(".//POST")
                     if post_elem is not None:
-                      message_text = post_elem.findtext("MESSAGE")
-                      nation = post_elem.findtext("NATION")
-                      
-                      # Extract quote blocks
-                      quotes = re.findall(r"\[quote=(.*?);(\d+)](.*?)\[/quote]", message_text, re.DOTALL)
-                      clean_text = re.sub(r"\[quote=(.*?);(\d+)](.*?)\[/quote]", "", message_text, flags=re.DOTALL).strip()
-                      
-                      embed = discord.Embed(title="New RMB Post", timestamp=datetime.utcnow())
-                      
-                      # Add quotes as separate fields
-                      for author, _, quote in quotes:
-                          embed.add_field(name=f"Quoted from {author}", value=quote.strip()[:1024], inline=False)
-                      
-                      # Add remaining message
-                      if clean_text:
-                          embed.add_field(name="Message", value=clean_text[:1024], inline=False)
-                      
-                      # Updated post link format
-                      post_url = f"https://www.nationstates.net/region={region}/page=display_region_rmb?postid={post_id}#p{post_id}"
-                      embed.set_footer(text=f"Posted by {nation} | View Post", icon_url="https://www.nationstates.net/images/nation_icon.png")
-                      embed.url = post_url
+                        message_text = post_elem.findtext("MESSAGE")
+                        nation = post_elem.findtext("NATION")
+                          
+                          # Extract quote blocks
+                        quotes = re.findall(r"\[quote=(.*?);(\d+)](.*?)\[/quote]", message_text, re.DOTALL)
+                        clean_text = re.sub(r"\[quote=(.*?);(\d+)](.*?)\[/quote]", "", message_text, flags=re.DOTALL).strip()
+                          
+                        embed = discord.Embed(title="New RMB Post", timestamp=datetime.utcnow())
+                          
+                          # Add quotes as separate fields
+                        for author, _, quote in quotes:
+                            embed.add_field(name=f"Quoted from {author}", value=quote.strip()[:1024], inline=False)
+                          
+                          # Add remaining message
+                        if clean_text:
+                            embed.add_field(name="Message", value=clean_text[:1024], inline=False)
+                          
+                          # Updated post link format
+                        post_url = f"https://www.nationstates.net/region={region}/page=display_region_rmb?postid={post_id}#p{post_id}"
+                        embed.set_footer(text=f"Posted by {nation} | View Post", icon_url="https://www.nationstates.net/images/nation_icon.png")
+                        embed.url = post_url
 
                         cfg = self.config.guild(guild)
                         channel_id = await cfg.channel()
