@@ -1,4 +1,4 @@
-fimport discord
+import discord
 import aiohttp
 import asyncio
 import re
