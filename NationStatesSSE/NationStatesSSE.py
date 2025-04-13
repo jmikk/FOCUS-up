@@ -190,6 +190,7 @@ class NationStatesSSE(commands.Cog):
             embed_title = "News from around the Well"
             if message.lower().startswith("following new legislation"):
                 embed_title = "FOLLOWING NEW LEGISLATION"
+                message = message.replace("Following new legislation in","In")
             elif re.search(r"@@.*?@@ endorsed @@.*?@@", message, re.IGNORECASE):
                 embed_title = "New Endorsement"
 
