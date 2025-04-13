@@ -175,7 +175,8 @@ class NationStatesSSE(commands.Cog):
                         clean_text = re.sub(r"\[quote=(.*?);(\d+)](.*?)\[/quote]", "", message_text, flags=re.DOTALL).strip()
                           
                         embed = discord.Embed(title="New RMB Post", timestamp=datetime.utcnow())
-                          
+                        if flag_url:
+                            embed.set_thumbnail(url=flag_url) 
                           # Add quotes as separate fields
                         for author, _, quote in quotes:
                             embed.add_field(name=f"Quoted from {author}", value=quote.strip()[:1024], inline=False)
@@ -186,7 +187,7 @@ class NationStatesSSE(commands.Cog):
 
                           # Updated post link format
                         post_url = f"https://www.nationstates.net/region={region}/page=display_region_rmb?postid={post_id}#p{post_id}"
-                        embed.set_footer(text=f"Posted by {nation}", icon_url="https://www.nationstates.net/images/nation_icon.png")
+                        embed.set_footer(text=f"Posted by {nation}")
                         embed.url = post_url
 
                         cfg = self.config.guild(guild)
@@ -208,6 +209,8 @@ class NationStatesSSE(commands.Cog):
                 message = message.replace(f'"<a href="page=dispatch/id={dispatch_id}">{dispatch_title}</a>"', 'a new')
 
                 embed = discord.Embed(title=dispatch_title, url=dispatch_url, description=message, timestamp=datetime.utcnow())
+                if flag_url:
+                    embed.set_thumbnail(url=flag_url)
                 embed.set_footer(text=f"{dispatch_type} Dispatch")
                 cfg = self.config.guild(guild)
                 channel_id = await cfg.channel()
