@@ -23,7 +23,7 @@ class NationStatesSSE(commands.Cog):
     @commands.admin()
     @commands.command()
     async def setchannel(self, ctx, channel: discord.TextChannel):
-        await self.config.channel.set(channel.id)
+        await self.config.set_global("channel", channel.id)
         await ctx.send(f"Set event output channel to {channel.mention}")
 
     @commands.admin()
@@ -31,7 +31,7 @@ class NationStatesSSE(commands.Cog):
     async def setregion(self, ctx, *, region: str):
         await self.config.region.set(region.lower().replace(" ", "_"))
         await ctx.send(f"Set SSE region to `{region}`.")
-        channel_id = await self.config.channel
+        channel_id = await self.config.channel()
         agent = await self.config.user_agent()
         if all([channel_id, agent]):
             if self.sse_task:
