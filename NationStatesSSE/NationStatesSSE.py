@@ -201,7 +201,7 @@ class NationStatesSSE(commands.Cog):
                     if post_elem is not None:
                         message_text = post_elem.findtext("MESSAGE")
                         nation = post_elem.findtext("NATION")
-                          
+                        message_text.replace("[i]","*").replace("[/i]","*").replace("[b]","**").replace("[/b]","**")
                           # Extract quote blocks
                         quotes = re.findall(r"\[quote=(.*?);(\d+)](.*?)\[/quote]", message_text, re.DOTALL)
                         clean_text = re.sub(r"\[quote=(.*?);(\d+)](.*?)\[/quote]", "", message_text, flags=re.DOTALL).strip()
