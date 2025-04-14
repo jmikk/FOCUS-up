@@ -143,7 +143,8 @@ class NationStatesSSE(commands.Cog):
                     channel = self.bot.get_channel(channel_id)
                     if channel:
                         try:
-                            await channel.send(f"⚠️ SSE Error: `{e}`")
+                            if str(e):
+                                await channel.send(f"⚠️ SSE Error: `{e}`")
                         except Exception:
                             pass
                 await asyncio.sleep(5)  # Wait before retrying
