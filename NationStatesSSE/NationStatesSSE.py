@@ -85,17 +85,23 @@ class NationStatesSSE(commands.Cog):
         await ctx.send("SSE listener will stop shortly.")
 
     @tasks.loop(minutes=1)
-    async def check_sse_tasks():
+    async def check_sse_tasks(self):
         for guild_id, task in list(self.sse_tasks.items()):
             if task.done():
                 try:
                     exc = task.exception()
-                    print(f"[Watchdog] SSE for {guild_id} crashed with exception: {exc}")
+                    print(f"[Watchdog] SSE for guild {guild_id} crashed with exception: {exc}")
                 except asyncio.CancelledError:
                     continue
                 guild = self.bot.get_guild(guild_id)
-                if guild:
+                if guild and not self.stop_flags.get(guild.id, False):
+                    print(f"[Watchdog] Restarting SSE for guild {guild_id}")
                     await self.restart_sse(guild)
+    
+    @check_sse_tasks.before_loop
+    async def before_check_sse_tasks(self):
+        await self.bot.wait_until_ready()
+
 
     async def restart_sse(self, guild, ctx=None):
         if guild.id in self.sse_tasks:
@@ -106,7 +112,8 @@ class NationStatesSSE(commands.Cog):
     
     async def sse_listener(self, guild):
         cfg = self.config.guild(guild)
-        self.stop_flags[guild.id] = False  # Reset stop flag on start
+        self.stop_flags[guild.id] = False  # Reset flag when starting
+    
         while not self.stop_flags.get(guild.id, False):
             try:
                 region = await cfg.region()
@@ -126,22 +133,26 @@ class NationStatesSSE(commands.Cog):
                             self.last_event_time[guild.id] = datetime.utcnow()
     
             except asyncio.CancelledError:
-                await channel.send(f"⚠️ SSE stopped")
-                print(f"[SSE] SSE listener cancelled for {guild.name}")
+                print(f"[SSE] SSE listener manually cancelled for {guild.name}")
                 break
+    
             except Exception as e:
                 print(f"[SSE] Error for {guild.name}:", e)
                 channel_id = await cfg.channel()
                 if channel_id:
                     channel = self.bot.get_channel(channel_id)
                     if channel:
-                        if len(e)>1:
+                        try:
                             await channel.send(f"⚠️ SSE Error: `{e}`")
-                await asyncio.sleep(1)  # Wait before trying to reconnect
-
+                        except Exception:
+                            pass
+                await asyncio.sleep(5)  # Wait before retrying
+    
+        # Clean up if stop flag is set
         print(f"[SSE] SSE loop exited for {guild.name}")
         self.sse_tasks.pop(guild.id, None)
         self.stop_flags.pop(guild.id, None)
+
 
 
                 
