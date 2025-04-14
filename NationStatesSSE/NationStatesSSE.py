@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 import json
 import xml.etree.ElementTree as ET
 import html
+from discord.ext import tasks
+
 
 
 
@@ -20,6 +22,7 @@ class NationStatesSSE(commands.Cog):
         self.sse_tasks = {}
         self.last_event_time = {}
         self.stop_flags = {}
+        self.check_sse_tasks.start()
 
 
     def cog_unload(self):
