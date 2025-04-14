@@ -119,7 +119,8 @@ class NationStatesSSE(commands.Cog):
                 if channel_id:
                     channel = self.bot.get_channel(channel_id)
                     if channel:
-                        await channel.send(f"⚠️ SSE Error: `{e}`")
+                        if len(e)>1:
+                            await channel.send(f"⚠️ SSE Error: `{e}`")
                 await asyncio.sleep(10)  # Wait before trying to reconnect
 
         print(f"[SSE] SSE loop exited for {guild.name}")
