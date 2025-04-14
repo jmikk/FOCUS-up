@@ -120,11 +120,9 @@ class NationStatesSSE(commands.Cog):
                             await channel.send(f"⚠️ SSE Error: `{e}`")
                 if "Session is closed" in str(e):
                     if guild.id in self.sse_tasks:
+                        await channel.send(f"⚠️ SSE Error: `{e}`")
                         del self.sse_tasks[guild.id]
                     break
-                    if e == "Session is closed" or e == "SSL shutdown timed out":
-                        await channel.send(f"⚠️ SSE Error: `{e}`")
-                        break
                     await asyncio.sleep(10)
                     continue    
                 
