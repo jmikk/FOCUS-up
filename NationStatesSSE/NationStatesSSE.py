@@ -81,6 +81,18 @@ class NationStatesSSE(commands.Cog):
         self.stop_flags[ctx.guild.id] = True
         await ctx.send("SSE listener will stop shortly.")
 
+    @tasks.loop(minutes=1)
+    async def check_sse_tasks():
+        for guild_id, task in list(self.sse_tasks.items()):
+            if task.done():
+                try:
+                    exc = task.exception()
+                    print(f"[Watchdog] SSE for {guild_id} crashed with exception: {exc}")
+                except asyncio.CancelledError:
+                    continue
+                guild = self.bot.get_guild(guild_id)
+                if guild:
+                    await self.restart_sse(guild)
 
     async def restart_sse(self, guild, ctx=None):
         if guild.id in self.sse_tasks:
@@ -111,6 +123,7 @@ class NationStatesSSE(commands.Cog):
                             self.last_event_time[guild.id] = datetime.utcnow()
     
             except asyncio.CancelledError:
+                await channel.send(f"⚠️ SSE stopped")
                 print(f"[SSE] SSE listener cancelled for {guild.name}")
                 break
             except Exception as e:
