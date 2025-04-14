@@ -19,6 +19,8 @@ class NationStatesSSE(commands.Cog):
         self.session = aiohttp.ClientSession()
         self.sse_tasks = {}
         self.last_event_time = {}
+        self.stop_flags = {}
+
 
     def cog_unload(self):
         for guild_id, task in list(self.sse_tasks.items()):
@@ -76,13 +78,9 @@ class NationStatesSSE(commands.Cog):
     @commands.admin()
     @commands.command()
     async def stopsse(self, ctx):
-        task = self.sse_tasks.get(ctx.guild.id)
-        if task:
-            task.cancel()
-            del self.sse_tasks[ctx.guild.id]
-            await ctx.send("SSE listener stopped.")
-        else:
-            await ctx.send("No SSE listener running.")
+        self.stop_flags[ctx.guild.id] = True
+        await ctx.send("SSE listener will stop shortly.")
+
 
     async def restart_sse(self, guild, ctx=None):
         if guild.id in self.sse_tasks:
@@ -90,16 +88,19 @@ class NationStatesSSE(commands.Cog):
         self.sse_tasks[guild.id] = asyncio.create_task(self.sse_listener(guild))
         if ctx:
             await ctx.send("🔁 Reconnected to updated SSE stream.")
-
+    
     async def sse_listener(self, guild):
         cfg = self.config.guild(guild)
-        while True:
+        self.stop_flags[guild.id] = False  # Reset stop flag on start
+        while not self.stop_flags.get(guild.id, False):
             try:
                 region = await cfg.region()
                 agent = await cfg.user_agent()
                 url = f"https://www.nationstates.net/api/region:{region}"
                 async with self.session.get(url, headers={"User-Agent": agent}) as resp:
                     async for line in resp.content:
+                        if self.stop_flags.get(guild.id, False):
+                            break
                         if line == b'\n':
                             continue
                         line = line.decode("utf-8").strip()
@@ -108,23 +109,24 @@ class NationStatesSSE(commands.Cog):
                             await self.handle_event(guild, line[6:])
                         elif line.startswith("heartbeat: "):
                             self.last_event_time[guild.id] = datetime.utcnow()
+    
             except asyncio.CancelledError:
                 print(f"[SSE] SSE listener cancelled for {guild.name}")
+                break
             except Exception as e:
                 print(f"[SSE] Error for {guild.name}:", e)
                 channel_id = await cfg.channel()
                 if channel_id:
                     channel = self.bot.get_channel(channel_id)
                     if channel:
-                        if len(e)>1:
-                            await channel.send(f"⚠️ SSE Error: `{e}`")
-                if "Session is closed" in str(e):
-                    if guild.id in self.sse_tasks:
                         await channel.send(f"⚠️ SSE Error: `{e}`")
-                        del self.sse_tasks[guild.id]
-                    break
-                    await asyncio.sleep(10)
-                    continue    
+                await asyncio.sleep(10)  # Wait before trying to reconnect
+
+        print(f"[SSE] SSE loop exited for {guild.name}")
+        self.sse_tasks.pop(guild.id, None)
+        self.stop_flags.pop(guild.id, None)
+
+
                 
     async def handle_event(self, guild, data):
         try:
