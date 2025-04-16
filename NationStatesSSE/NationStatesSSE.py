@@ -280,3 +280,29 @@ class NationStatesSSE(commands.Cog):
             blacklist.append(word)
         await ctx.send(f"✅ Added `{word}` to the blacklist.")
 
+    @commands.guild_only()
+    @commands.admin()
+    @commands.command()
+    async def removefromblacklist(self, ctx, *, word: str):
+        """Remove a word or phrase from the blacklist."""
+        word = word.lower().strip()
+        async with self.config.guild(ctx.guild).blacklist() as blacklist:
+            if word not in blacklist:
+                await ctx.send(f"❌ `{word}` is not in the blacklist.")
+                return
+            blacklist.remove(word)
+        await ctx.send(f"✅ Removed `{word}` from the blacklist.")
+        
+    @commands.guild_only()
+    @commands.admin()
+    @commands.command()
+    async def listblacklist(self, ctx):
+        """List all words or phrases in the blacklist."""
+        blacklist = await self.config.guild(ctx.guild).blacklist()
+        if not blacklist:
+            await ctx.send("📭 The blacklist is currently empty.")
+            return
+        formatted = "\n".join(f"- `{w}`" for w in blacklist)
+        await ctx.send(f"🛑 Blacklisted words/phrases:\n{formatted}")
+
+
