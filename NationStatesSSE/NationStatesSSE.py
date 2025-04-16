@@ -143,7 +143,7 @@ class NationStatesSSE(commands.Cog):
                     channel = self.bot.get_channel(channel_id)
                     if channel:
                         try:
-                            if str(e):
+                            if str(e) and not e == "Response payload is not completed":
                                 await channel.send(f"⚠️ SSE Error: `{e}`")
                         except Exception:
                             pass
