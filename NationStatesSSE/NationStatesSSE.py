@@ -266,3 +266,17 @@ class NationStatesSSE(commands.Cog):
 
         except Exception as e:
             print(f"[Event Handler] Error in {guild.name}:", e)
+
+    @commands.guild_only()
+    @commands.admin()
+    @commands.command()
+    async def addtoblacklist(self, ctx, *, word: str):
+        """Add a word to the blacklist for event filtering."""
+        word = word.lower().strip()
+        async with self.config.guild(ctx.guild).blacklist() as blacklist:
+            if word in blacklist:
+                await ctx.send(f"❌ `{word}` is already in the blacklist.")
+                return
+            blacklist.append(word)
+        await ctx.send(f"✅ Added `{word}` to the blacklist.")
+
