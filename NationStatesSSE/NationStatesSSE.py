@@ -144,7 +144,7 @@ class NationStatesSSE(commands.Cog):
                     if channel:
                         try:
                             if str(e) and not e == "Response payload is not completed":
-                                await channel.send(f"⚠️ SSE Error: `{e}`")
+                                #await channel.send(f"⚠️ SSE Error: `{e}`")
                         except Exception:
                             pass
                 await asyncio.sleep(5)  # Wait before retrying
