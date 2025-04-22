@@ -144,6 +144,7 @@ class NationStatesSSE(commands.Cog):
                     if channel:
                         try:
                             if str(e) and not e == "Response payload is not completed":
+                                pass
                                 #await channel.send(f"⚠️ SSE Error: `{e}`")
                         except Exception:
                             pass
